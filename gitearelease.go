@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-func getLatestReleases(repoURL, owner, repo string, latest bool) ([]Release, error) {
+func GetLatestReleases(repoURL, owner, repo string, latest bool) ([]Release, error) {
 	releaseType := "releases"
 	if latest {
 		releaseType = "releases/latest"
