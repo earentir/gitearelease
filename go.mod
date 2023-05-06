@@ -1,3 +1,3 @@
-module github.com/earentir/giterelease
+module github.com/earentir/gitearelease
 
 go 1.20
