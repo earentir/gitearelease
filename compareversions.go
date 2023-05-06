@@ -8,8 +8,8 @@ import (
 
 func CompareVersions(v1, v2 string) int {
 	// Remove the "v." prefix from the version strings
-	v1 = TrimVersionPrefix(v1)
-	v2 = TrimVersionPrefix(v2)
+	v1 = trimVersionPrefix(v1)
+	v2 = trimVersionPrefix(v2)
 
 	// Split the version strings into individual version numbers
 	v1Numbers := strings.Split(v1, ".")
@@ -47,7 +47,7 @@ func CompareVersions(v1, v2 string) int {
 	return 0
 }
 
-func TrimVersionPrefix(version string) string {
+func trimVersionPrefix(version string) string {
 	returnVersion := strings.ToLower(version)
 	returnVersion = strings.TrimPrefix(returnVersion, "v")
 	returnVersion = strings.TrimPrefix(returnVersion, "version")
