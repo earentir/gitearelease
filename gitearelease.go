@@ -15,8 +15,6 @@ func GetLatestReleases(repoURL, owner, repo string, latest bool) ([]Release, err
 	}
 	apiURL := fmt.Sprintf("%s/api/v1/repos/%s/%s/%s", repoURL, owner, repo, releaseType)
 
-	fmt.Println(apiURL)
-
 	resp, err := http.Get(apiURL)
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch latest releases: %s", err)
