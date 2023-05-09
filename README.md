@@ -1,7 +1,9 @@
 # gitearelease
+
 Access gitea releases over the API
 
-## Example
+## get latest release
+
 You get the owner and repo from the url
 
 https://gitea.repodomain.tld/api/v1/repos/earentir/somerepo/releases
@@ -9,7 +11,6 @@ https://gitea.repodomain.tld/api/v1/repos/earentir/somerepo/releases
 The owner is earentir
 
 The repo is somerepo
-
 
 ```go
 
@@ -38,6 +39,30 @@ for _, release := range releases {
 		fmt.Println("    Download count:", asset.DownloadCount)
 		fmt.Println("    Type:", asset.Type)
 	}
+	fmt.Println()
+}
+```
+
+## get user repos
+
+```go
+
+repoURL := "https://gitea.repodomain.tld"
+owner := "earentir"
+
+rp, err := gitearelease.GetRepositories(repoURL, owner, true) //the last value is a bool, it will only return repos that have releases
+if err != nil {
+	fmt.Println(err)
+	return
+}
+
+for _, r := range rp {
+	fmt.Println("Repository:", r.Name)
+	fmt.Println("Name:", r.FullName)
+	fmt.Println("  Description:", r.Description)
+	fmt.Println("  Release counter:", r.ReleaseCounter)
+	fmt.Println("  Created:", r.Created)
+	fmt.Println("  Updated:", r.Updated)
 	fmt.Println()
 }
 ```
