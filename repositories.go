@@ -9,7 +9,6 @@ import (
 
 func GetRepositories(baseURL, user string, withrelease bool) ([]Repository, error) {
 	client := &http.Client{}
-	fmt.Println(baseURL + "/api/v1/users/" + user + "/repos")
 	req, err := http.NewRequest("GET", baseURL+"/api/v1/users/"+user+"/repos", nil)
 	if err != nil {
 		return nil, err
