@@ -35,3 +35,13 @@ type Asset struct {
 	BrowserDownloadURL string `json:"browser_download_url"`
 	Type               string `json:"type"`
 }
+
+type Repository struct {
+	ID             int64  `json:"id"`
+	Name           string `json:"name"`
+	FullName       string `json:"full_name"`
+	Description    string `json:"description"`
+	ReleaseCounter int    `json:"release_counter"`
+	Created        string `json:"created_at"`
+	Updated        string `json:"updated_at"`
+}
