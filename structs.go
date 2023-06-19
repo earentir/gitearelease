@@ -1,5 +1,6 @@
 package gitearelease
 
+// Release represents a release from a repository
 type Release struct {
 	ID          int    `json:"id"`
 	TagName     string `json:"tag_name"`
@@ -7,17 +8,17 @@ type Release struct {
 	Body        string `json:"body"`
 	URL         string `json:"url"`
 	HTMLUrl     string `json:"html_url"`
-	TarballUrl  string `json:"tarball_url"`
-	ZipballUrl  string `json:"zipball_url"`
+	TarballURL  string `json:"tarball_url"`
+	ZipballURL  string `json:"zipball_url"`
 	Draft       bool   `json:"draft"`
 	Prerelease  bool   `json:"prerelease"`
 	CreatedAt   string `json:"created_at"`
 	PublishedAt string `json:"published_at"`
-	Author      Author
-	Assets      []Asset
+	Author      author
+	Assets      []asset
 }
 
-type Author struct {
+type author struct {
 	Login     string `json:"login"`
 	LoginName string `json:"login_name"`
 	FullName  string `json:"full_name"`
@@ -25,7 +26,7 @@ type Author struct {
 	Username  string `json:"username"`
 }
 
-type Asset struct {
+type asset struct {
 	ID                 int    `json:"id"`
 	Name               string `json:"name"`
 	Size               int64  `json:"size"`
@@ -36,6 +37,7 @@ type Asset struct {
 	Type               string `json:"type"`
 }
 
+// Repository represents a repository from a user or organization
 type Repository struct {
 	ID             int64  `json:"id"`
 	Name           string `json:"name"`
