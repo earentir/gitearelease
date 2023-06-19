@@ -6,6 +6,7 @@ import (
 	"strings"
 )
 
+// CompareVersions compares two version strings and returns 1 if v1 is greater than v2, -1 if v1 is less than v2, and 0 if v1 is equal to v2
 func CompareVersions(v1, v2 string) int {
 	// Remove the version prefixs from the version strings
 	v1 = trimVersionPrefix(v1)
@@ -47,10 +48,11 @@ func CompareVersions(v1, v2 string) int {
 	return 0
 }
 
+// trimVersionPrefix removes common version prefixes from a version string
 func trimVersionPrefix(version string) string {
 	version = strings.ToLower(version)
 
-	var verstrings []string = []string{"v", "version", "ver", "release", "rel", "r", "v."}
+	var verstrings = []string{"v", "version", "ver", "release", "rel", "r", "v."}
 	for _, verstring := range verstrings {
 		version = strings.TrimPrefix(version, verstring)
 	}

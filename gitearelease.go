@@ -8,6 +8,7 @@ import (
 	"strings"
 )
 
+// GetLatestReleases will return the latest release of a repository
 func GetLatestReleases(repoURL, owner, repo string, latest bool) ([]Release, error) {
 	releaseType := "releases"
 	if latest {
