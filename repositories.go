@@ -7,6 +7,7 @@ import (
 	"net/http"
 )
 
+// GetRepositories returns all repositories of a user from a gitea instance can be filtered by release
 func GetRepositories(baseURL, user string, withrelease bool) ([]Repository, error) {
 	client := &http.Client{}
 	req, err := http.NewRequest("GET", baseURL+"/api/v1/users/"+user+"/repos", nil)
@@ -35,12 +36,15 @@ func GetRepositories(baseURL, user string, withrelease bool) ([]Repository, erro
 		return nil, err
 	}
 
-	reposWithReleases := []Repository{}
-	for _, repo := range allRepos {
-		if repo.ReleaseCounter > 0 && withrelease {
-			reposWithReleases = append(reposWithReleases, repo)
-		}
+	if withrelease == false {
+		return allRepos, nil
 	}
 
-	return reposWithReleases, nil
+	reposWithRelease := []Repository{}
+	for _, repo := range allRepos {
+		if repo.ReleaseCounter > 0 && withrelease {
+			reposWithRelease = append(reposWithRelease, repo)
+		}
+	}
+	return reposWithRelease, nil
 }
