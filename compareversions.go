@@ -47,15 +47,3 @@ func CompareVersions(v1, v2 string) int {
 	// The version numbers are the same
 	return 0
 }
-
-// trimVersionPrefix removes common version prefixes from a version string
-func trimVersionPrefix(version string) string {
-	version = strings.ToLower(version)
-
-	var verstrings = []string{"v", "version", "ver", "release", "rel", "r", "v."}
-	for _, verstring := range verstrings {
-		version = strings.TrimPrefix(version, verstring)
-	}
-
-	return version
-}
