@@ -48,5 +48,9 @@ func GetReleases(repoURL, owner, repo string, latest bool) ([]Release, error) {
 		}
 	}
 
+	if resp.StatusCode != 200 {
+		return nil, fmt.Errorf("failed to fetch latest releases: %s", string(body))
+	}
+
 	return releases, nil
 }
