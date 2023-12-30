@@ -2,8 +2,8 @@ package gitearelease
 
 import "strings"
 
-// trimVersionPrefix removes common version prefixes from a version string
-func trimVersionPrefix(version string) string {
+// TrimVersionPrefix removes common version prefixes from a version string
+func TrimVersionPrefix(version string) string {
 	version = strings.ToLower(version)
 
 	var verstrings = []string{"v", "version", "ver", "release", "rel", "r", "v."}
