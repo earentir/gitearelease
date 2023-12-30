@@ -2,7 +2,8 @@
 
 Access gitea releases over the API
 
-## get latest release
+## get releases
+```go func gitearelease.GetReleases(repoURL string, owner string, repo string, latest bool) ([]gitearelease.Release, error) ```
 
 You get the owner and repo from the url
 
@@ -18,7 +19,7 @@ repoURL := "https://gitea.repodomain.tld"
 owner := "earentir"
 repo := "somerepo"
 
-releases, err := gitearelease.GetLatestReleases(repoURL, owner, repo, true) //the last value is a bool, it will instead get the latest release by adding /latest in the URL
+releases, err := gitearelease.GetReleases(repoURL, owner, repo, true) //the last value is a bool, it will instead get the latest release by adding /latest in the URL
 if err != nil {
 	fmt.Println(err)
 	return
@@ -44,6 +45,7 @@ for _, release := range releases {
 ```
 
 ## get user repos
+```go func gitearelease.GetRepositories(baseURL string, user string, withrelease bool) ([]gitearelease.Repository, error)```
 
 ```go
 
