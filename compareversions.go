@@ -9,8 +9,8 @@ import (
 // CompareVersions compares two version strings and returns 1 if v1 is greater than v2, -1 if v1 is less than v2, and 0 if v1 is equal to v2
 func CompareVersions(v1, v2 string) int {
 	// Remove the version prefixs from the version strings
-	v1 = trimVersionPrefix(v1)
-	v2 = trimVersionPrefix(v2)
+	v1 = TrimVersionPrefix(v1)
+	v2 = TrimVersionPrefix(v2)
 
 	// Split the version strings into individual version numbers
 	v1Numbers := strings.Split(v1, ".")
