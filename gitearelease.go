@@ -1,3 +1,4 @@
+// Package gitearelease contains the functions to fetch the releases from a Gitea repository
 package gitearelease
 
 import (
