@@ -37,6 +37,10 @@ func GetReleases(repoURL, owner, repo string, latest bool) ([]Release, error) {
 			return nil, fmt.Errorf("failed to parse JSON response: %s", err)
 		}
 		release.Body = strings.ReplaceAll(release.Body, "\n", " ")
+
+		//Detect Type of Asset
+		//Return Binary and executable type
+
 		releases = append(releases, release)
 	} else {
 		err = json.Unmarshal(body, &releases)
