@@ -2,6 +2,26 @@ package gitearelease
 
 import "time"
 
+// VersionStrings represents the strings used to describe the version comparison
+type VersionStrings struct {
+	Own            string
+	Current        string
+	VersionStrings versionstringstruct
+	VersionOptions versionoptionsstruct
+}
+
+type versionstringstruct struct {
+	Older           string
+	Upgrade         string
+	Equal           string
+	Newer           string
+	OfferUpgradeURL string
+}
+
+type versionoptionsstruct struct {
+	DieIfOlder bool
+}
+
 // ReleaseToFetch represents a release from a repository
 type ReleaseToFetch struct {
 	BaseURL string

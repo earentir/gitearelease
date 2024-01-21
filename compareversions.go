@@ -7,14 +7,14 @@ import (
 )
 
 // CompareVersions compares two version strings and returns  -1 if own is older than current, 0 if own is equal to current and 1 if own is newer than current
-func CompareVersions(own, current string) int {
+func CompareVersions(versionstrings VersionStrings) int {
 	// Remove the version prefixs from the version strings
-	own = TrimVersionPrefix(own)
-	current = TrimVersionPrefix(current)
+	versionstrings.Own = TrimVersionPrefix(versionstrings.Own)
+	versionstrings.Current = TrimVersionPrefix(versionstrings.Current)
 
 	// Split the version strings into individual version numbers
-	ownNumbers := strings.Split(own, ".")
-	currentNumbers := strings.Split(current, ".")
+	ownNumbers := strings.Split(versionstrings.Own, ".")
+	currentNumbers := strings.Split(versionstrings.Current, ".")
 
 	// Convert the version numbers to integers and compare them
 	for i := 0; i < len(ownNumbers) && i < len(currentNumbers); i++ {
