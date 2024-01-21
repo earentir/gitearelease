@@ -2,6 +2,7 @@ package gitearelease
 
 import (
 	"fmt"
+	"os"
 	"strconv"
 	"strings"
 )
@@ -46,4 +47,36 @@ func CompareVersions(versionstrings VersionStrings) int {
 
 	// The version numbers are the same
 	return 0
+}
+
+// CompareVersionsHelper is a helper function for CompareVersions that returns a string instead of an integer
+func CompareVersionsHelper(versionstrings VersionStrings) string {
+	switch CompareVersions(versionstrings) {
+	case -1:
+		if versionstrings.VersionStrings.Older == "" {
+			versionstrings.VersionStrings.Older = "You are behind"
+		}
+
+		if versionstrings.VersionOptions.DieIfOlder {
+			fmt.Println(versionstrings.VersionStrings.Older)
+			os.Exit(125)
+		}
+		// if versionstrings.VersionString.OfferUpgradeURL != "" {
+		// 	versionstrings.VersionString.Older = versionstrings.VersionString.Older + " - " + versionstrings.VersionString.OfferUpgradeURL
+		// }
+
+		return versionstrings.VersionStrings.Older
+	case 0:
+		if versionstrings.VersionStrings.Equal == "" {
+			versionstrings.VersionStrings.Equal = "Current Version"
+		}
+		return versionstrings.VersionStrings.Equal
+	case 1:
+		if versionstrings.VersionStrings.Newer == "" {
+			versionstrings.VersionStrings.Newer = "You are ahead"
+		}
+		return versionstrings.VersionStrings.Newer
+	}
+
+	return ""
 }
