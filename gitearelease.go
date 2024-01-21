@@ -15,7 +15,7 @@ func GetReleases(releasetofetch ReleaseToFetch) ([]Release, error) {
 	if releasetofetch.Latest {
 		releaseType = "releases/latest"
 	}
-	apiURL := fmt.Sprintf("%s/api/v1/repos/%s/%s/%s", releasetofetch.BaseURL, releasetofetch.User, releasetofetch.User, releaseType)
+	apiURL := fmt.Sprintf("%s/api/v1/repos/%s/%s/%s", releasetofetch.BaseURL, releasetofetch.User, releasetofetch.Repo, releaseType)
 
 	resp, err := http.Get(apiURL)
 	if err != nil {
