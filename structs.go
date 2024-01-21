@@ -2,6 +2,21 @@ package gitearelease
 
 import "time"
 
+// ReleaseToFetch represents a release from a repository
+type ReleaseToFetch struct {
+	BaseURL string
+	User    string
+	Repo    string
+	Latest  bool
+}
+
+// RepositoriesToFetch represents a release from a repository
+type RepositoriesToFetch struct {
+	BaseURL    string
+	User       string
+	WithReleas bool
+}
+
 // Release represents a release from a repository
 type Release struct {
 	ID          int    `json:"id"`

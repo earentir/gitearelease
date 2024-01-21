@@ -10,12 +10,12 @@ import (
 )
 
 // GetReleases will return the all the releases or just the latest release of a repository
-func GetReleases(repoURL, owner, repo string, latest bool) ([]Release, error) {
+func GetReleases(releasetofetch ReleaseToFetch) ([]Release, error) {
 	releaseType := "releases"
-	if latest {
+	if releasetofetch.Latest {
 		releaseType = "releases/latest"
 	}
-	apiURL := fmt.Sprintf("%s/api/v1/repos/%s/%s/%s", repoURL, owner, repo, releaseType)
+	apiURL := fmt.Sprintf("%s/api/v1/repos/%s/%s/%s", releasetofetch.BaseURL, releasetofetch.User, releasetofetch.User, releaseType)
 
 	resp, err := http.Get(apiURL)
 	if err != nil {
@@ -30,7 +30,7 @@ func GetReleases(repoURL, owner, repo string, latest bool) ([]Release, error) {
 
 	var releases []Release
 
-	if latest {
+	if releasetofetch.Latest {
 		var release Release
 		err = json.Unmarshal(body, &release)
 		if err != nil {

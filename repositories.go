@@ -9,9 +9,10 @@ import (
 
 // GetRepositories returns all repositories of a user from a gitea instance can be filtered by release
 // if withrelease is true only repositories with releases will be returned
-func GetRepositories(baseURL, user string, withrelease bool) ([]Repository, error) {
+func GetRepositories(repositoriestofetch RepositoriesToFetch) ([]Repository, error) {
 	client := &http.Client{}
-	req, err := http.NewRequest("GET", baseURL+"/api/v1/users/"+user+"/repos", nil)
+	repoURL := fmt.Sprintf("%s/api/v1/users/%s/repos", repositoriestofetch.BaseURL, repositoriestofetch.User)
+	req, err := http.NewRequest("GET", repoURL, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -37,13 +38,13 @@ func GetRepositories(baseURL, user string, withrelease bool) ([]Repository, erro
 		return nil, err
 	}
 
-	if withrelease == false {
+	if !repositoriestofetch.WithReleas {
 		return allRepos, nil
 	}
 
 	reposWithRelease := []Repository{}
 	for _, repo := range allRepos {
-		if repo.ReleaseCounter > 0 && withrelease {
+		if repo.ReleaseCounter > 0 && repositoriestofetch.WithReleas {
 			reposWithRelease = append(reposWithRelease, repo)
 		}
 	}
