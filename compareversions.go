@@ -54,7 +54,7 @@ func CompareVersionsHelper(versionstrings VersionStrings) string {
 	switch CompareVersions(versionstrings) {
 	case -1:
 		if versionstrings.VersionStrings.Older == "" {
-			versionstrings.VersionStrings.Older = "You are behind"
+			versionstrings.VersionStrings.Older = "There is a newer release available"
 		}
 
 		if versionstrings.VersionOptions.DieIfOlder {
@@ -68,12 +68,12 @@ func CompareVersionsHelper(versionstrings VersionStrings) string {
 		return versionstrings.VersionStrings.Older
 	case 0:
 		if versionstrings.VersionStrings.Equal == "" {
-			versionstrings.VersionStrings.Equal = "Current Version"
+			versionstrings.VersionStrings.Equal = "You are up to date"
 		}
 		return versionstrings.VersionStrings.Equal
 	case 1:
 		if versionstrings.VersionStrings.Newer == "" {
-			versionstrings.VersionStrings.Newer = "You are ahead"
+			versionstrings.VersionStrings.Newer = "You are on an unreleased version"
 		}
 		return versionstrings.VersionStrings.Newer
 	}
