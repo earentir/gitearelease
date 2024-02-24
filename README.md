@@ -1,10 +1,6 @@
-
 # gitearelease
 
 A package to access details for repositories and releases in gitea, it includes various helpers including the comparison of the current and leatest released version
-
-
-
 
 ## Usage/Examples
 
@@ -116,11 +112,12 @@ type RepositoriesToFetch
 type Repository
 type VersionStrings
 ```
-## Dependancies
+## Dependancies & Documentation
+[![Go Mod](https://img.shields.io/github/go-mod/go-version/earentir/gitearelease)]()
 
+[![Go Reference](https://pkg.go.dev/badge/github.com/earentir/gitearelease.svg)](https://pkg.go.dev/github.com/earentir/gitearelease) 
 
 [![Dependancies](https://img.shields.io/librariesio/github/earentir/gitearelease)]()
-
 ## Authors
 
 - [@earentir](https://www.github.com/earentir)
