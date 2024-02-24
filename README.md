@@ -38,12 +38,12 @@ func checkVersion() {
 	var versionstrings gitearelease.VersionStrings
 	versionstrings.Own = appversion
 	versionstrings.Current = rels[0].TagName
-  // Example of custom comparison messages
+        // Example of custom comparison messages
 	versionstrings.VersionStrings.Older = "Upgrade this ASAP"
 	versionstrings.VersionStrings.Newer = "You are ahead of the game"
-  versionstrings.VersionStrings.Equal = "You are up to date"
+        versionstrings.VersionStrings.Equal = "You are up to date"
 
-  // Optionally we could terminate the applicaiton if we are older than latest release
+        // Optionally we could terminate the applicaiton if we are older than latest release
 	// versionstrings.VersionOptions.DieIfOlder = true
 
 	fmt.Println(gitearelease.CompareVersionsHelper(versionstrings))
