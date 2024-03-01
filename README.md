@@ -118,6 +118,9 @@ type VersionStrings
 [![Go Reference](https://pkg.go.dev/badge/github.com/earentir/gitearelease.svg)](https://pkg.go.dev/github.com/earentir/gitearelease) 
 
 [![Dependancies](https://img.shields.io/librariesio/github/earentir/gitearelease)]()
+
+[![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/earentir/gitearelease/badge)](https://securityscorecards.dev/viewer/?uri=github.com/earentir/gitearelease)
+
 ## Authors
 
 - [@earentir](https://www.github.com/earentir)
