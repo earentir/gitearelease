@@ -4,8 +4,6 @@ package gitearelease
 import (
 	"encoding/json"
 	"fmt"
-	"io"
-	"net/http"
 	"strings"
 )
 
@@ -17,22 +15,16 @@ func GetReleases(releasetofetch ReleaseToFetch) ([]Release, error) {
 	}
 	apiURL := fmt.Sprintf("%s/api/v1/repos/%s/%s/%s", releasetofetch.BaseURL, releasetofetch.User, releasetofetch.Repo, releaseType)
 
-	resp, err := http.Get(apiURL)
+	apiData, err := fetchData(apiURL)
 	if err != nil {
-		return nil, fmt.Errorf("failed to fetch latest releases: %s", err)
-	}
-	defer resp.Body.Close()
-
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return nil, fmt.Errorf("failed to read response body: %s", err)
+		return nil, err
 	}
 
 	var releases []Release
 
 	if releasetofetch.Latest {
 		var release Release
-		err = json.Unmarshal(body, &release)
+		err = json.Unmarshal(apiData, &release)
 		if err != nil {
 			return nil, fmt.Errorf("failed to parse JSON response: %s", err)
 		}
@@ -43,17 +35,13 @@ func GetReleases(releasetofetch ReleaseToFetch) ([]Release, error) {
 
 		releases = append(releases, release)
 	} else {
-		err = json.Unmarshal(body, &releases)
+		err = json.Unmarshal(apiData, &releases)
 		if err != nil {
 			return nil, fmt.Errorf("failed to parse JSON response: %s", err)
 		}
 		for i := range releases {
 			releases[i].Body = strings.ReplaceAll(releases[i].Body, "\n", " ")
 		}
-	}
-
-	if resp.StatusCode != 200 {
-		return nil, fmt.Errorf("failed to fetch latest releases: %s", string(body))
 	}
 
 	return releases, nil
