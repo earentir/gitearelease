@@ -11,11 +11,11 @@ import (
 func CompareVersions(versionstrings VersionStrings) int {
 	// Remove the version prefixs from the version strings
 	versionstrings.Own = TrimVersionPrefix(versionstrings.Own)
-	versionstrings.Current = TrimVersionPrefix(versionstrings.Current)
+	versionstrings.Latest = TrimVersionPrefix(versionstrings.Latest)
 
 	// Split the version strings into individual version numbers
 	ownNumbers := strings.Split(versionstrings.Own, ".")
-	currentNumbers := strings.Split(versionstrings.Current, ".")
+	currentNumbers := strings.Split(versionstrings.Latest, ".")
 
 	// Convert the version numbers to integers and compare them
 	for i := 0; i < len(ownNumbers) && i < len(currentNumbers); i++ {
@@ -57,24 +57,34 @@ func CompareVersionsHelper(versionstrings VersionStrings) string {
 			versionstrings.VersionStrings.Older = "There is a newer release available"
 		}
 
+		if versionstrings.VersionStrings.UpgradeURL != "" {
+			versionstrings.VersionStrings.Older = "There is a newer release available at " + versionstrings.VersionStrings.UpgradeURL
+		}
+
 		if versionstrings.VersionOptions.DieIfOlder {
 			fmt.Println(versionstrings.VersionStrings.Older)
 			os.Exit(125)
 		}
-		// if versionstrings.VersionString.OfferUpgradeURL != "" {
-		// 	versionstrings.VersionString.Older = versionstrings.VersionString.Older + " - " + versionstrings.VersionString.OfferUpgradeURL
-		// }
 
 		return versionstrings.VersionStrings.Older
 	case 0:
-		if versionstrings.VersionStrings.Equal == "" {
-			versionstrings.VersionStrings.Equal = "You are up to date"
+		if versionstrings.VersionOptions.ShowMessageOnCurrent {
+			if versionstrings.VersionStrings.Equal == "" {
+				versionstrings.VersionStrings.Equal = "You are up to date"
+			}
+			return versionstrings.VersionStrings.Equal
 		}
-		return versionstrings.VersionStrings.Equal
+		return ""
 	case 1:
 		if versionstrings.VersionStrings.Newer == "" {
 			versionstrings.VersionStrings.Newer = "You are on an unreleased version"
 		}
+
+		if versionstrings.VersionOptions.DieIfNewer {
+			fmt.Println(versionstrings.VersionStrings.Newer)
+			os.Exit(125)
+		}
+
 		return versionstrings.VersionStrings.Newer
 	}
 

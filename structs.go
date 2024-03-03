@@ -5,21 +5,24 @@ import "time"
 // VersionStrings represents the strings used to describe the version comparison
 type VersionStrings struct {
 	Own            string
-	Current        string
+	Latest         string
 	VersionStrings versionstringstruct
 	VersionOptions versionoptionsstruct
 }
 
 type versionstringstruct struct {
-	Older           string
-	Upgrade         string
-	Equal           string
-	Newer           string
-	OfferUpgradeURL string
+	Older      string
+	Upgrade    string
+	Equal      string
+	Newer      string
+	UpgradeURL string
 }
 
 type versionoptionsstruct struct {
-	DieIfOlder bool
+	DieIfOlder           bool
+	DieIfNewer           bool
+	ShowMessageOnCurrent bool
+	Silent               bool
 }
 
 // ReleaseToFetch represents a release from a repository
