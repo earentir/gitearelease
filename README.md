@@ -131,6 +131,20 @@ All contributions are required to follow the https://google.github.io/styleguide
 
 All code contributed must include its tests in (_test) and have a minimum of 80% coverage
 
+## Vulnerability Reporting
+
+Please report any security vulnerabilities to the project using issues or directly to the owner.
+
+## Code of Conduct
+ This project follows the go project code of conduct, please refer to https://go.dev/conduct for more details
+
+## Roadmap
+
+- Create a finalised version 1 of the package
+- Add support for downloading binaries from releases
+- Add support for github releases
+- Add support for gitlab releases
+
 ## Authors
 
 - [@earentir](https://www.github.com/earentir)
