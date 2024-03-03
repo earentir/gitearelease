@@ -119,6 +119,8 @@ type VersionStrings
 
 [![Dependancies](https://img.shields.io/librariesio/github/earentir/gitearelease)]()
 
+[![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/earentir/gitearelease/badge)](https://securityscorecards.dev/viewer/?uri=github.com/earentir/gitearelease)
+
 ## Authors
 
 - [@earentir](https://www.github.com/earentir)
