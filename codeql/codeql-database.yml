@@ -1,0 +1,11 @@
+---
+sourceLocationPrefix: /home/pantazis/projects/earentir/packages/gitearelease
+baselineLinesOfCode: 631
+unicodeNewlines: false
+columnKind: utf8
+primaryLanguage: go
+creationMetadata:
+  sha: 79368b0e3d5943f4eabfca8ce0abc1b231ffc9e5
+  cliVersion: 2.16.3
+  creationTime: 2024-03-03T16:34:29.977603625Z
+finalised: true

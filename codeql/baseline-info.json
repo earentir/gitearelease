@@ -1,0 +1,1 @@
+{"languages":{"go":{"displayName":"Go","files":["gitearelease.go","web_test.go","utils.go","compareversions_test.go","repositories_test.go","repositories.go","compareversions.go","web.go","downloadfile_test.go","downloadfile.go","structs.go"],"linesOfCode":631,"name":"go"}}}
