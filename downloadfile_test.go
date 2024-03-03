@@ -46,7 +46,7 @@ func TestDownloadBinary_Success(t *testing.T) {
 		t.Errorf("DownloadBinary() filePath = %v, want %v", filePath, expectedFilePath)
 	}
 
-	content, err := ioutil.ReadFile(filePath)
+	content, err := os.ReadFile(filePath)
 	if err != nil {
 		t.Fatalf("Failed to read downloaded file: %s", err)
 	}
