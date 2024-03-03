@@ -123,6 +123,14 @@ type VersionStrings
 
 [![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/earentir/gitearelease/badge)](https://securityscorecards.dev/viewer/?uri=github.com/earentir/gitearelease)
 
+
+## Contributing
+
+Contributions are always welcome!
+All contributions are required to follow the https://google.github.io/styleguide/go/
+
+All code contributed must include its tests in (_test) and have a minimum of 80% coverage
+
 ## Authors
 
 - [@earentir](https://www.github.com/earentir)
