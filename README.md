@@ -123,6 +123,9 @@ type VersionStrings
 
 [![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/earentir/gitearelease/badge)](https://securityscorecards.dev/viewer/?uri=github.com/earentir/gitearelease)
 
+![Code Climate issues](https://img.shields.io/codeclimate/tech-debt/earentir/gitearelease)
+
+
 
 ## Contributing
 
