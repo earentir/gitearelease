@@ -117,7 +117,7 @@ type VersionStrings
 
 [![Go Reference](https://pkg.go.dev/badge/github.com/earentir/gitearelease.svg)](https://pkg.go.dev/github.com/earentir/gitearelease)
 
-[![Dependancies](https://img.shields.io/librariesio/github/earentir/gitearelease)]()
+[![Dependancies](https://img.shields.io/librariesio/github/earentir/gitearelease)](https://libraries.io/github/earentir/gitearelease)
 
 [![OpenSSF Best Practices](https://www.bestpractices.dev/projects/8581/badge)](https://www.bestpractices.dev/projects/8581)
 
