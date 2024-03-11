@@ -1,7 +1,6 @@
 package gitearelease
 
 import (
-	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -25,14 +24,14 @@ func TestDownloadBinary_Success(t *testing.T) {
 	server := mockServer()
 	defer server.Close()
 
-	tempDir, err := ioutil.TempDir("", "download_test")
+	tempDir, err := os.CreateTemp("", "download_test")
 	if err != nil {
 		t.Fatalf("Failed to create temp directory: %s", err)
 	}
-	defer os.RemoveAll(tempDir)
+	defer os.RemoveAll(tempDir.Name())
 
 	filename := "testfile.bin"
-	filePath, err := DownloadBinary(server.URL, tempDir, filename)
+	filePath, err := DownloadBinary(server.URL, os.TempDir(), filename)
 	if err != nil {
 		t.Fatalf("DownloadBinary() error = %v, wantErr %v", err, false)
 	}
@@ -41,7 +40,7 @@ func TestDownloadBinary_Success(t *testing.T) {
 		t.Errorf("DownloadBinary() file %s does not exist", filePath)
 	}
 
-	expectedFilePath := filepath.Join(tempDir, filename)
+	expectedFilePath := filepath.Join(os.TempDir(), filename)
 	if filePath != expectedFilePath {
 		t.Errorf("DownloadBinary() filePath = %v, want %v", filePath, expectedFilePath)
 	}
