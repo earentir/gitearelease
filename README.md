@@ -113,18 +113,17 @@ type Repository
 type VersionStrings
 ```
 ## Dependancies & Documentation
-[![Go Mod](https://img.shields.io/github/go-mod/go-version/earentir/gitearelease)]()
+[![Go Mod](https://img.shields.io/github/go-mod/go-version/earentir/gitearelease?style=for-the-badge)]()
 
 [![Go Reference](https://pkg.go.dev/badge/github.com/earentir/gitearelease.svg)](https://pkg.go.dev/github.com/earentir/gitearelease)
 
-[![Dependancies](https://img.shields.io/librariesio/github/earentir/gitearelease)](https://libraries.io/github/earentir/gitearelease)
+[![Dependancies](https://img.shields.io/librariesio/github/earentir/gitearelease?style=for-the-badge)](https://libraries.io/github/earentir/gitearelease)
 
 [![OpenSSF Best Practices](https://www.bestpractices.dev/projects/8581/badge)](https://www.bestpractices.dev/projects/8581)
 
 [![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/earentir/gitearelease/badge)](https://securityscorecards.dev/viewer/?uri=github.com/earentir/gitearelease)
 
-![Code Climate issues](https://img.shields.io/codeclimate/tech-debt/earentir/gitearelease)
-
+![Code Climate issues](https://img.shields.io/codeclimate/tech-debt/earentir/gitearelease?style=for-the-badge)
 
 
 ## Contributing
