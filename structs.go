@@ -1,15 +1,19 @@
+// structs.go
 package gitearelease
 
 import "time"
 
 // VersionStrings represents the strings used to describe the version comparison
+// including custom messages and options.
 type VersionStrings struct {
 	Own            string
+	Current        string
 	Latest         string
 	VersionStrings versionstringstruct
 	VersionOptions versionoptionsstruct
 }
 
+// versionstringstruct holds the messages for version comparison outcomes.
 type versionstringstruct struct {
 	Older      string
 	Upgrade    string
@@ -25,7 +29,7 @@ type versionoptionsstruct struct {
 	Silent               bool
 }
 
-// ReleaseToFetch represents a release from a repository
+// ReleaseToFetch represents which release(s) to fetch from a repository.
 type ReleaseToFetch struct {
 	BaseURL string
 	User    string
@@ -33,14 +37,15 @@ type ReleaseToFetch struct {
 	Latest  bool
 }
 
-// RepositoriesToFetch represents a release from a repository
+// RepositoriesToFetch represents which repositories to list.
+// The legacy typo WithReleas is still honoured; prefer WithReleases.
 type RepositoriesToFetch struct {
-	BaseURL    string
-	User       string
-	WithReleas bool
+	BaseURL      string
+	User         string
+	WithReleases bool
 }
 
-// Release represents a release from a repository
+// Release represents a release payload from Gitea.
 type Release struct {
 	ID          int    `json:"id"`
 	TagName     string `json:"tag_name"`
@@ -74,10 +79,10 @@ type asset struct {
 	CreatedAt          string `json:"created_at"`
 	UUID               string `json:"uuid"`
 	BrowserDownloadURL string `json:"browser_download_url"`
-	Type               string `json:"type"` //Detect the Type of the asset
+	Type               string `json:"type"` // Detect the asset type
 }
 
-// Repository represents a repository from a user or organization
+// Repository represents a repository from a user or organization.
 type Repository struct {
 	ID    int `json:"id"`
 	Owner struct {
@@ -103,14 +108,13 @@ type Repository struct {
 		StarredReposCount int       `json:"starred_repos_count"`
 		Username          string    `json:"username"`
 	} `json:"owner"`
-	Name        string `json:"name"`
-	FullName    string `json:"full_name"`
-	Description string `json:"description"`
-	Empty       bool   `json:"empty"`
-	Private     bool   `json:"private"`
-	Fork        bool   `json:"fork"`
-	Template    bool   `json:"template"`
-	// Parent          interface{} `json:"parent"`
+	Name            string    `json:"name"`
+	FullName        string    `json:"full_name"`
+	Description     string    `json:"description"`
+	Empty           bool      `json:"empty"`
+	Private         bool      `json:"private"`
+	Fork            bool      `json:"fork"`
+	Template        bool      `json:"template"`
 	Mirror          bool      `json:"mirror"`
 	Size            int       `json:"size"`
 	Language        string    `json:"language"`
@@ -162,5 +166,5 @@ type Repository struct {
 	Internal                      bool      `json:"internal"`
 	MirrorInterval                string    `json:"mirror_interval"`
 	MirrorUpdated                 time.Time `json:"mirror_updated"`
-	// RepoTransfer                  interface{} `json:"repo_transfer"`
+	// RepoTransfer              interface{} `json:"repo_transfer"`
 }
