@@ -154,6 +154,58 @@ See [examples/main.go](examples/main.go) for a full sample that:
 
 ---
 
+## Dependancies & Documentation
+[![Go Mod](https://img.shields.io/github/go-mod/go-version/earentir/gitearelease)]()
+
+[![Go Reference](https://pkg.go.dev/badge/github.com/earentir/gitearelease.svg)](https://pkg.go.dev/github.com/earentir/gitearelease)
+
+[![Dependancies](https://img.shields.io/librariesio/github/earentir/gitearelease)](https://libraries.io/github/earentir/gitearelease)
+
+[![OpenSSF Best Practices](https://www.bestpractices.dev/projects/8581/badge)](https://www.bestpractices.dev/projects/8581)
+
+[![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/earentir/gitearelease/badge)](https://securityscorecards.dev/viewer/?uri=github.com/earentir/gitearelease)
+
+![Code Climate issues](https://img.shields.io/codeclimate/tech-debt/earentir/gitearelease)
+
+---
+
+## Contributing
+
+Contributions are always welcome!
+All contributions are required to follow the https://google.github.io/styleguide/go/
+
+All code contributed must include its tests in (_test) and have a minimum of 80% coverage
+
+---
+
+## Vulnerability Reporting
+
+Please report any security vulnerabilities to the project using issues or directly to the owner.
+
+---
+
+## Code of Conduct
+ This project follows the go project code of conduct, please refer to https://go.dev/conduct for more details
+
+ ---
+
+## Roadmap
+
+- Create a finalised version 1 of the package
+- Add support for downloading binaries from releases
+- Add support for github releases
+- Add support for gitlab releases
+
+---
+
+## Authors
+
+- [@earentir](https://www.github.com/earentir)
+
+---
+
 ## License
 
-[MIT](LICENSE)
+I will always follow the Linux Kernel License as primary, if you require any other OPEN license please let me know and I will try to accomodate it.
+
+[![License](https://img.shields.io/github/license/earentir/gitearelease)](https://opensource.org/license/gpl-2-0)
