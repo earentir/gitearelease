@@ -195,14 +195,16 @@ func CompareVersions(v VersionStrings) int {
 		}
 		if ownNum > latestNum {
 			return 1
-		} else if ownNum < latestNum {
+		}
+		if ownNum < latestNum {
 			return -1
 		}
 	}
 
 	if len(ownNumbers) > len(latestNumbers) {
 		return 1
-	} else if len(ownNumbers) < len(latestNumbers) {
+	}
+	if len(ownNumbers) < len(latestNumbers) {
 		return -1
 	}
 	return 0
