@@ -12,7 +12,7 @@ import (
 
 // mockServer simulates an HTTP server for testing the download function.
 func mockServer() *httptest.Server {
-	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	handler := http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		_, err := w.Write([]byte("test content"))
 		if err != nil {
@@ -58,7 +58,7 @@ func TestDownloadBinary_Success(t *testing.T) {
 }
 
 func setupMockServer(body string, statusCode int) *httptest.Server {
-	return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(statusCode)
 		fmt.Fprintln(w, body)
 	}))

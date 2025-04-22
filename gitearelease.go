@@ -1,4 +1,4 @@
-// gitearelease.go
+// Package gitearelease provides functions to interact with Gitea's API and fetch the releases
 package gitearelease
 
 import (
@@ -115,7 +115,7 @@ func GetRepositories(r RepositoriesToFetch) ([]Repository, error) {
 	// Print the parsed repositories for debugging
 	// fmt.Println("Parsed Repositories:", allRepos)
 
-	withReleases := r.WithReleases || r.WithReleases // legacy flag kept
+	withReleases := r.WithReleases
 	if !withReleases {
 		return allRepos, nil
 	}

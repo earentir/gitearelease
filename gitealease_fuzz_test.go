@@ -10,7 +10,7 @@ func FuzzDownloadBinary(f *testing.F) {
 	// Add initial seed corpus. These are examples of inputs that your function expects.
 	f.Add("http://example.com", "outputDir", "filename.bin") // You might need to adjust this based on your actual usage.
 
-	f.Fuzz(func(t *testing.T, url, _, filename string) {
+	f.Fuzz(func(t *testing.T, _, _, filename string) {
 		// Set up a mock server to avoid making real HTTP requests.
 		server := mockServer()
 		defer server.Close()

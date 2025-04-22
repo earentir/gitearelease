@@ -1,4 +1,4 @@
-// structs.go
+// Package gitearelease provides functions to interact with Gitea's API and fetch the releases
 package gitearelease
 
 import "time"
