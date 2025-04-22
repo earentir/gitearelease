@@ -7,7 +7,6 @@ import "time"
 // including custom messages and options.
 type VersionStrings struct {
 	Own            string
-	Current        string
 	Latest         string
 	VersionStrings versionstringstruct
 	VersionOptions versionoptionsstruct
