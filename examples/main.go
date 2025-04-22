@@ -60,7 +60,7 @@ func main() {
 		// 3. Compare app version vs. latest tag
 		var vs gitearelease.VersionStrings
 		vs.Own = appVersion
-		vs.Current = latest.TagName
+		vs.Latest = latest.TagName
 		vs.VersionStrings.Older = "Upgrade this ASAP"
 		vs.VersionStrings.Newer = "You are ahead of the game"
 		vs.VersionStrings.Equal = "You are up to date"
