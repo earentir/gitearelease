@@ -70,9 +70,9 @@ func TestGetRepositories_Success(t *testing.T) {
 	defer mockServer.Close()
 
 	repositoriesToFetch := RepositoriesToFetch{
-		BaseURL:    mockServer.URL, // Use the URL of the mock server
-		User:       "testuser",
-		WithReleas: false,
+		BaseURL:      mockServer.URL, // Use the URL of the mock server
+		User:         "testuser",
+		WithReleases: false,
 	}
 
 	expectedRepos := []Repository{
@@ -95,9 +95,9 @@ func TestGetRepositories_APIError(t *testing.T) {
 	defer mockServer.Close()
 
 	repositoriesToFetch := RepositoriesToFetch{
-		BaseURL:    mockServer.URL, // Use the URL of the mock server
-		User:       "testuser",
-		WithReleas: false,
+		BaseURL:      mockServer.URL, // Use the URL of the mock server
+		User:         "testuser",
+		WithReleases: false,
 	}
 
 	_, err := GetRepositories(repositoriesToFetch)
@@ -112,9 +112,9 @@ func TestGetRepositories_WithReleases(t *testing.T) {
 	defer mockServer.Close()
 
 	repositoriesToFetch := RepositoriesToFetch{
-		BaseURL:    mockServer.URL, // Use the URL of the mock server
-		User:       "testuser",
-		WithReleas: true, // Only fetch repos with releases
+		BaseURL:      mockServer.URL, // Use the URL of the mock server
+		User:         "testuser",
+		WithReleases: true, // Only fetch repos with releases
 	}
 
 	expectedRepos := []Repository{
