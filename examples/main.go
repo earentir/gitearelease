@@ -64,6 +64,7 @@ func main() {
 		vs.VersionStrings.Older = "Upgrade this ASAP"
 		vs.VersionStrings.Newer = "You are ahead of the game"
 		vs.VersionStrings.Equal = "You are up to date"
+		// versionstrings.VersionOptions.DieIfOlder = true
 		vs.VersionOptions.ShowMessageOnCurrent = true
 
 		msg := gitearelease.CompareVersionsHelper(vs)
@@ -90,6 +91,9 @@ func main() {
 				}
 				asset.Type = fmt.Sprintf("%s %s %s", typeInfo.OperatingSystem, typeInfo.Arch, typeInfo.Endianess)
 				fmt.Println("    Asset Type:", asset.Type)
+				fmt.Println("    UUID:", asset.UUID)
+				fmt.Println("    Download count:", asset.DownloadCount)
+				fmt.Println("    Type:", asset.Type)
 			}
 			fmt.Println()
 		}
