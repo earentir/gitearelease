@@ -185,12 +185,12 @@ func CompareVersions(v VersionStrings) int {
 	for i := 0; i < len(ownNumbers) && i < len(latestNumbers); i++ {
 		ownNum, err := strconv.Atoi(ownNumbers[i])
 		if err != nil {
-			fmt.Println("invalid version:", ownNumbers[i])
+			fmt.Println("Invalid version:", ownNumbers[i])
 			return 0
 		}
 		latestNum, err := strconv.Atoi(latestNumbers[i])
 		if err != nil {
-			fmt.Println("invalid version:", latestNumbers[i])
+			fmt.Println("Invalid version:", latestNumbers[i])
 			return 0
 		}
 		if ownNum > latestNum {
