@@ -1,6 +1,6 @@
 # gitearelease
 
-`gitearelease` is a Go package for fetching repository and release metadata from a Gitea instance, with built‑in version comparison utilities and configurable HTTP timeouts.
+`gitearelease` is a Go package for fetching repository and release metadata from Git hosting platforms (Gitea, GitHub, GitLab), with built‑in version comparison utilities and configurable HTTP timeouts.
 
 ---
 
@@ -143,9 +143,29 @@ msg := gitearelease.CompareVersionsHelper(vs)
 
 ---
 
-## Example
+## Examples
 
-See [examples/main.go](examples/main.go) for a full sample that:
+### Provider-Specific Examples
+
+Each example demonstrates the provider's capabilities and documents any limitations:
+
+- **[Gitea Example](examples/gitea/main.go)**: Full-featured example showing Gitea-specific advantages
+  - Accurate `ReleaseCounter`
+  - Complete asset information (Size, DownloadCount, UUID, CreatedAt)
+  - All repository metadata fields
+  - Native `/releases/latest` endpoint
+
+- **[GitHub Example](examples/github/main.go)**: Example using GitHub API
+  - Near-complete feature support
+  - Note: `ReleaseCounter` is a placeholder (1 if releases exist)
+
+- **[GitLab Example](examples/gitlab/main.go)**: Example using GitLab API with limitations noted
+  - Basic release/repository functionality
+  - Note: Missing `ReleaseCounter`, asset details, draft/prerelease flags
+
+### Original Example
+
+See [examples/main.go](examples/main.go) for the original full sample that:
 
 1. Lists repos
 1. Fetches the latest release
@@ -189,12 +209,86 @@ Please report any security vulnerabilities to the project using issues or direct
 
  ---
 
+## Multi-Provider Support
+
+This package now supports **Gitea**, **GitHub**, and **GitLab**! Provider detection is automatic based on the `BaseURL`, but you can also explicitly specify the provider.
+
+### Auto-Detection
+
+The package automatically detects the provider from the `BaseURL`:
+
+```go
+// GitHub - automatically detected
+releases, err := gitearelease.GetReleases(gitearelease.ReleaseToFetch{
+    BaseURL: "https://api.github.com",
+    User:    "golang",
+    Repo:    "go",
+    Latest:  true,
+})
+
+// GitLab - automatically detected
+releases, err := gitearelease.GetReleases(gitearelease.ReleaseToFetch{
+    BaseURL: "https://gitlab.com",
+    User:    "gitlab-org",
+    Repo:    "gitlab",
+    Latest:  true,
+})
+
+// Gitea - automatically detected (or default)
+releases, err := gitearelease.GetReleases(gitearelease.ReleaseToFetch{
+    BaseURL: "https://gitea.com",
+    User:    "earentir",
+    Repo:    "gitearelease",
+    Latest:  true,
+})
+```
+
+### Explicit Provider Selection
+
+You can explicitly specify the provider:
+
+```go
+// Explicitly specify GitHub
+releases, err := gitearelease.GetReleases(gitearelease.ReleaseToFetch{
+    BaseURL:  "https://api.github.com",
+    User:     "golang",
+    Repo:     "go",
+    Latest:   true,
+    Provider: "github", // "gitea", "github", or "gitlab"
+})
+```
+
+### BaseURL Format
+
+- **GitHub**: Use `https://api.github.com` or `https://github.com` (auto-converted)
+- **GitLab**: Use `https://gitlab.com/api/v4` or `https://gitlab.com` (auto-converted)
+- **Gitea**: Use your Gitea instance URL (e.g., `https://gitea.com`)
+
+### Backward Compatibility
+
+All existing code continues to work without changes! The package defaults to Gitea behavior when no provider is specified, ensuring full backward compatibility.
+
+### Provider Differences
+
+⚠️ **Important**: Not all features are available on all providers. See [PROVIDER_DIFFERENCES.md](PROVIDER_DIFFERENCES.md) for detailed information.
+
+**Quick Summary**:
+- **Gitea**: Full feature support (most complete)
+- **GitHub**: Near-complete support (ReleaseCounter is placeholder)
+- **GitLab**: Limited support (missing ReleaseCounter, asset details, draft/prerelease flags)
+
+**Key Differences**:
+- `ReleaseCounter`: Only accurate for Gitea (placeholder for GitHub, unavailable for GitLab)
+- Asset information: Complete for Gitea/GitHub, limited for GitLab (missing size, download count)
+- Draft/Prerelease: Fully supported for Gitea/GitHub, not supported for GitLab
+- Repository metadata: Complete for Gitea/GitHub, limited for GitLab
+
+See the examples directory for provider-specific usage examples.
+
 ## Roadmap
 
 - Create a finalised version 1 of the package
 - Add support for downloading binaries from releases
-- Add support for github releases
-- Add support for gitlab releases
 
 ---
 

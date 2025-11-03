@@ -1,8 +1,8 @@
-// Package gitearelease provides functions to interact with Gitea's API and fetch the releases
+// Package gitearelease provides functions to interact with Git hosting platforms (Gitea, GitHub, GitLab) and fetch releases.
+// The package automatically detects the provider from the BaseURL, but you can also explicitly specify it.
 package gitearelease
 
 import (
-	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
@@ -11,6 +11,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/earentir/gitearelease/providers"
 )
 
 // defaultHTTPTimeout is applied to every outbound HTTP operation made by
@@ -36,36 +38,54 @@ func SetHTTPTimeout(d time.Duration) {
 /* -------------------------------------------------------------------------- */
 
 // GetReleases returns all releases or only the latest release from a repository.
+// Supports Gitea, GitHub, and GitLab. Provider is auto-detected from BaseURL if not specified.
 func GetReleases(r ReleaseToFetch) ([]Release, error) {
-	releaseType := "releases"
-	if r.Latest {
-		releaseType = "releases/latest"
+	// Determine provider - auto-detect if not specified
+	providerType := providers.ProviderType(r.Provider)
+	if providerType == "" {
+		// Auto-detect from BaseURL
+		provider := providers.GetProvider("", r.BaseURL)
+		if provider.DetectProvider(r.BaseURL) {
+			// Determine which provider was detected
+			if providers.NewGitHubProvider().DetectProvider(r.BaseURL) {
+				providerType = providers.ProviderGitHub
+			} else if providers.NewGitLabProvider().DetectProvider(r.BaseURL) {
+				providerType = providers.ProviderGitLab
+			} else {
+				providerType = providers.ProviderGitea // Default for backward compatibility
+			}
+		} else {
+			providerType = providers.ProviderGitea // Default for backward compatibility
+		}
 	}
-	apiURL := fmt.Sprintf("%s/api/v1/repos/%s/%s/%s",
-		r.BaseURL, r.User, r.Repo, releaseType)
 
+	// Normalize BaseURL for GitHub (add api.github.com if needed)
+	baseURL := normalizeBaseURL(r.BaseURL, providerType)
+
+	// Get the appropriate provider
+	provider := providers.GetProvider(providerType, baseURL)
+
+	// Construct API URL using provider
+	apiURL := provider.GetReleasesURL(baseURL, r.User, r.Repo, r.Latest)
+
+	// Fetch data
 	apiData, err := fetchData(apiURL)
 	if err != nil {
 		return nil, err
 	}
 
-	var releases []Release
-	if r.Latest {
-		var rel Release
-		if err := json.Unmarshal(apiData, &rel); err != nil {
-			return nil, fmt.Errorf("parse JSON: %w", err)
-		}
-		rel.Body = strings.ReplaceAll(rel.Body, "\n", " ")
-		releases = append(releases, rel)
-		return releases, nil
+	// Normalize response using provider
+	providerReleases, err := provider.NormalizeRelease(apiData, r.Latest)
+	if err != nil {
+		return nil, err
 	}
 
-	if err := json.Unmarshal(apiData, &releases); err != nil {
-		return nil, fmt.Errorf("parse JSON: %w", err)
+	// Convert from provider types to main package types
+	releases := make([]Release, len(providerReleases))
+	for i, pr := range providerReleases {
+		releases[i] = convertProviderRelease(pr)
 	}
-	for i := range releases {
-		releases[i].Body = strings.ReplaceAll(releases[i].Body, "\n", " ")
-	}
+
 	return releases, nil
 }
 
@@ -95,26 +115,49 @@ func DownloadBinary(url, outputDir, filename string) (string, error) {
 }
 
 // GetRepositories returns all repositories of a user and can filter by releases.
+// Supports Gitea, GitHub, and GitLab. Provider is auto-detected from BaseURL if not specified.
 func GetRepositories(r RepositoriesToFetch) ([]Repository, error) {
-	apiURL := fmt.Sprintf("%s/api/v1/users/%s/repos", r.BaseURL, r.User)
-	// fmt.Println("APIURL", apiURL)
+	// Determine provider - auto-detect if not specified
+	providerType := providers.ProviderType(r.Provider)
+	if providerType == "" {
+		// Auto-detect from BaseURL
+		if providers.NewGitHubProvider().DetectProvider(r.BaseURL) {
+			providerType = providers.ProviderGitHub
+		} else if providers.NewGitLabProvider().DetectProvider(r.BaseURL) {
+			providerType = providers.ProviderGitLab
+		} else {
+			providerType = providers.ProviderGitea // Default for backward compatibility
+		}
+	}
 
+	// Normalize BaseURL for GitHub (add api.github.com if needed)
+	baseURL := normalizeBaseURL(r.BaseURL, providerType)
+
+	// Get the appropriate provider
+	provider := providers.GetProvider(providerType, baseURL)
+
+	// Construct API URL using provider
+	apiURL := provider.GetRepositoriesURL(baseURL, r.User)
+
+	// Fetch data
 	apiData, err := fetchData(apiURL)
 	if err != nil {
 		return nil, err
 	}
 
-	//Print the raw API data for debugging
-	// fmt.Println("Raw API Data:", string(apiData))
-
-	var allRepos []Repository
-	if err := json.Unmarshal(apiData, &allRepos); err != nil {
-		return nil, fmt.Errorf("parse JSON: %w", err)
+	// Normalize response using provider
+	providerRepos, err := provider.NormalizeRepositories(apiData)
+	if err != nil {
+		return nil, err
 	}
 
-	// Print the parsed repositories for debugging
-	// fmt.Println("Parsed Repositories:", allRepos)
+	// Convert from provider types to main package types
+	allRepos := make([]Repository, len(providerRepos))
+	for i, pr := range providerRepos {
+		allRepos[i] = convertProviderRepository(pr)
+	}
 
+	// Filter by releases if requested
 	withReleases := r.WithReleases
 	if !withReleases {
 		return allRepos, nil
@@ -126,9 +169,6 @@ func GetRepositories(r RepositoriesToFetch) ([]Repository, error) {
 			repos = append(repos, repo)
 		}
 	}
-
-	// Print the filtered repositories for debugging
-	// fmt.Println("Filtered Repositories with Releases:", repos)
 
 	return repos, nil
 }
@@ -145,6 +185,136 @@ func TrimVersionPrefix(v string) string {
 /* -------------------------------------------------------------------------- */
 /*  INTERNALS                                                                 */
 /* -------------------------------------------------------------------------- */
+
+// convertProviderRelease converts a provider Release to the main package Release
+func convertProviderRelease(pr providers.Release) Release {
+	rel := Release{
+		ID:          pr.ID,
+		TagName:     pr.TagName,
+		Name:        pr.Name,
+		Body:        pr.Body,
+		URL:         pr.URL,
+		HTMLUrl:     pr.HTMLUrl,
+		TarballURL:  pr.TarballURL,
+		ZipballURL:  pr.ZipballURL,
+		Draft:       pr.Draft,
+		Prerelease:  pr.Prerelease,
+		CreatedAt:   pr.CreatedAt,
+		PublishedAt: pr.PublishedAt,
+		Author: Author{
+			Login:     pr.Author.Login,
+			LoginName: pr.Author.LoginName,
+			FullName:  pr.Author.FullName,
+			Email:     pr.Author.Email,
+			Username:  pr.Author.Username,
+		},
+		Assets: make([]Asset, len(pr.Assets)),
+	}
+
+	for i, pa := range pr.Assets {
+		rel.Assets[i] = Asset{
+			ID:                 pa.ID,
+			Name:               pa.Name,
+			Size:               pa.Size,
+			DownloadCount:      pa.DownloadCount,
+			CreatedAt:          pa.CreatedAt,
+			UUID:               pa.UUID,
+			BrowserDownloadURL: pa.BrowserDownloadURL,
+			Type:               pa.Type,
+		}
+	}
+
+	return rel
+}
+
+// convertProviderRepository converts a provider Repository to the main package Repository
+func convertProviderRepository(pr providers.Repository) Repository {
+	createdAt, _ := time.Parse(time.RFC3339, pr.CreatedAt)
+	updatedAt, _ := time.Parse(time.RFC3339, pr.UpdatedAt)
+
+	repo := Repository{
+		ID:              pr.ID,
+		Name:            pr.Name,
+		FullName:        pr.FullName,
+		Description:     pr.Description,
+		Private:         pr.Private,
+		Fork:            pr.Fork,
+		Size:            pr.Size,
+		Language:        pr.Language,
+		HTMLURL:         pr.HTMLURL,
+		CloneURL:        pr.CloneURL,
+		SSHURL:          pr.SSHURL,
+		StarsCount:      pr.StarsCount,
+		ForksCount:      pr.ForksCount,
+		WatchersCount:   pr.WatchersCount,
+		OpenIssuesCount: pr.OpenIssuesCount,
+		ReleaseCounter:  pr.ReleaseCounter,
+		DefaultBranch:   pr.DefaultBranch,
+		Archived:        pr.Archived,
+		CreatedAt:       createdAt,
+		UpdatedAt:       updatedAt,
+		HasIssues:       pr.HasIssues,
+		HasWiki:         pr.HasWiki,
+		HasProjects:     pr.HasProjects,
+		HasReleases:     pr.HasReleases,
+		HasPackages:     pr.HasPackages,
+	}
+
+	repo.Owner.ID = pr.Owner.ID
+	repo.Owner.Login = pr.Owner.Login
+	repo.Owner.Username = pr.Owner.Username
+	repo.Owner.FullName = pr.Owner.FullName
+	repo.Owner.Email = pr.Owner.Email
+	repo.Owner.AvatarURL = pr.Owner.AvatarURL
+
+	repo.Permissions.Admin = pr.Permissions.Admin
+	repo.Permissions.Push = pr.Permissions.Push
+	repo.Permissions.Pull = pr.Permissions.Pull
+
+	return repo
+}
+
+// normalizeBaseURL ensures the BaseURL is properly formatted for the provider
+func normalizeBaseURL(baseURL string, providerType providers.ProviderType) string {
+	baseURL = strings.TrimSuffix(baseURL, "/")
+
+	// For GitHub, if user provided github.com, convert to api.github.com
+	if providerType == providers.ProviderGitHub {
+		if strings.Contains(baseURL, "github.com") && !strings.Contains(baseURL, "api.github.com") {
+			baseURL = strings.Replace(baseURL, "github.com", "api.github.com", 1)
+		}
+		// If no domain specified, assume api.github.com
+		if baseURL == "" || baseURL == "github.com" {
+			return "https://api.github.com"
+		}
+		// Ensure https:// prefix
+		if !strings.HasPrefix(baseURL, "http://") && !strings.HasPrefix(baseURL, "https://") {
+			return "https://" + baseURL
+		}
+	}
+
+	// For GitLab, ensure proper API path
+	if providerType == providers.ProviderGitLab {
+		if strings.Contains(baseURL, "gitlab.com") && !strings.Contains(baseURL, "/api/v4") {
+			// gitlab.com -> gitlab.com/api/v4
+			baseURL = strings.TrimSuffix(baseURL, "/api/v4")
+		}
+		// If no domain specified, assume gitlab.com
+		if baseURL == "" || baseURL == "gitlab.com" {
+			return "https://gitlab.com/api/v4"
+		}
+		// Ensure https:// prefix
+		if !strings.HasPrefix(baseURL, "http://") && !strings.HasPrefix(baseURL, "https://") {
+			return "https://" + baseURL
+		}
+		// Ensure /api/v4 suffix for GitLab
+		if !strings.HasSuffix(baseURL, "/api/v4") && !strings.Contains(baseURL, "/api/v4/") {
+			baseURL = strings.TrimSuffix(baseURL, "/") + "/api/v4"
+		}
+	}
+
+	return baseURL
+}
 
 func fetchData(url string) ([]byte, error) {
 	req, err := http.NewRequest(http.MethodGet, url, nil)

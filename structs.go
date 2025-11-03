@@ -1,4 +1,4 @@
-// Package gitearelease provides functions to interact with Gitea's API and fetch the releases
+// Package gitearelease provides functions to interact with Git hosting platforms (Gitea, GitHub, GitLab) and fetch releases.
 package gitearelease
 
 import "time"
@@ -29,19 +29,23 @@ type versionoptionsstruct struct {
 }
 
 // ReleaseToFetch represents which release(s) to fetch from a repository.
+// Provider can be "gitea", "github", or "gitlab". If empty, it will be auto-detected from BaseURL.
 type ReleaseToFetch struct {
-	BaseURL string
-	User    string
-	Repo    string
-	Latest  bool
+	BaseURL  string
+	User     string
+	Repo     string
+	Latest   bool
+	Provider string // Optional: "gitea", "github", "gitlab" - auto-detected if empty
 }
 
 // RepositoriesToFetch represents which repositories to list.
 // The legacy typo WithReleas is still honoured; prefer WithReleases.
+// Provider can be "gitea", "github", or "gitlab". If empty, it will be auto-detected from BaseURL.
 type RepositoriesToFetch struct {
 	BaseURL      string
 	User         string
 	WithReleases bool
+	Provider     string // Optional: "gitea", "github", "gitlab" - auto-detected if empty
 }
 
 // Release represents a release payload from Gitea.
@@ -58,11 +62,12 @@ type Release struct {
 	Prerelease  bool   `json:"prerelease"`
 	CreatedAt   string `json:"created_at"`
 	PublishedAt string `json:"published_at"`
-	Author      author
-	Assets      []asset
+	Author      Author
+	Assets      []Asset
 }
 
-type author struct {
+// Author represents the author of a release
+type Author struct {
 	Login     string `json:"login"`
 	LoginName string `json:"login_name"`
 	FullName  string `json:"full_name"`
@@ -70,7 +75,8 @@ type author struct {
 	Username  string `json:"username"`
 }
 
-type asset struct {
+// Asset represents a release asset
+type Asset struct {
 	ID                 int    `json:"id"`
 	Name               string `json:"name"`
 	Size               int64  `json:"size"`
