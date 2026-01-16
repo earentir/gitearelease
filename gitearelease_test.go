@@ -66,10 +66,6 @@ func setupMockServer(body string, statusCode int) *httptest.Server {
 	}))
 }
 
-// setupMockServerWithHandler creates a mock server with a custom handler
-func setupMockServerWithHandler(handler http.HandlerFunc) *httptest.Server {
-	return httptest.NewServer(handler)
-}
 
 func TestGetRepositories_Gitea_Success(t *testing.T) {
 	// Gitea JSON format - must include all required fields
@@ -444,6 +440,60 @@ func TestCompareVersions(t *testing.T) {
 	versionstrings.Own = "0.1.33-c350f37"
 	versionstrings.Latest = "0.1.33-d450f48"
 	expected = -1 // "c350f37" < "d450f48" lexicographically
+	result = CompareVersions(versionstrings)
+	if result != expected {
+		t.Errorf("Expected: %d, got: %d", expected, result)
+	}
+
+	// Test case 15: Date-based versions - YYYY-MM-DD format
+	versionstrings.Own = "2024-01-15"
+	versionstrings.Latest = "2024-01-10"
+	expected = 1 // 2024-01-15 > 2024-01-10
+	result = CompareVersions(versionstrings)
+	if result != expected {
+		t.Errorf("Expected: %d, got: %d", expected, result)
+	}
+
+	// Test case 16: Date-based versions - YYYY.MM.DD format
+	versionstrings.Own = "2023.12.25"
+	versionstrings.Latest = "2024.01.01"
+	expected = -1 // 2023-12-25 < 2024-01-01
+	result = CompareVersions(versionstrings)
+	if result != expected {
+		t.Errorf("Expected: %d, got: %d", expected, result)
+	}
+
+	// Test case 17: Date-based versions - YYYYMMDD format
+	versionstrings.Own = "20240101"
+	versionstrings.Latest = "20231231"
+	expected = 1 // 2024-01-01 > 2023-12-31
+	result = CompareVersions(versionstrings)
+	if result != expected {
+		t.Errorf("Expected: %d, got: %d", expected, result)
+	}
+
+	// Test case 18: Date-based versions with equal dates
+	versionstrings.Own = "2024-01-15"
+	versionstrings.Latest = "2024-01-15"
+	expected = 0 // Same date
+	result = CompareVersions(versionstrings)
+	if result != expected {
+		t.Errorf("Expected: %d, got: %d", expected, result)
+	}
+
+	// Test case 19: Date-based versions with 2-digit year
+	versionstrings.Own = "24-01-15"
+	versionstrings.Latest = "23-12-31"
+	expected = 1 // 2024-01-15 > 2023-12-31
+	result = CompareVersions(versionstrings)
+	if result != expected {
+		t.Errorf("Expected: %d, got: %d", expected, result)
+	}
+
+	// Test case 20: Mixed date and semantic version (should fall back to semantic comparison)
+	versionstrings.Own = "2024-01-15"
+	versionstrings.Latest = "1.0.0"
+	expected = 1 // "2024" > "1" numerically when treated as semantic version
 	result = CompareVersions(versionstrings)
 	if result != expected {
 		t.Errorf("Expected: %d, got: %d", expected, result)

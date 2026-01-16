@@ -94,23 +94,32 @@ clean := gitearelease.TrimVersionPrefix("v1.0.0-commithash") // "1.0.0-commithas
 ---
 
 ### `CompareVersions(v VersionStrings) int`
-Compares two version strings (after trimming prefixes). Supports version suffixes like `-commithash`.
+Compares two version strings (after trimming prefixes). Supports semantic versions, version suffixes, and date-based versions.
 
 **Parameters**:
 - `v.Own string` – your current version.
 - `v.Latest string` – the target version to compare against.
-- prefixes are stripped before numeric comparison.
-- suffixes (e.g., `-abc123`, `-beta`) are compared lexicographically after numeric parts.
+- prefixes are stripped before comparison.
+- supports semantic versions, suffixes, and dates.
 
 **Returns**:
 - `-1` if `Own < Latest`
 - `0`  if `Own == Latest`
 - `1`  if `Own > Latest`
 
+**Supported Version Formats**:
+- **Semantic versions**: `1.0.0`, `2.1.3`, `0.1.33-c350f37`
+- **Date-based versions**:
+  - `YYYY-MM-DD` (e.g., `2024-01-15`)
+  - `YYYY.MM.DD` (e.g., `2024.01.15`)
+  - `YYYYMMDD` (e.g., `20240115`)
+  - `YY-MM-DD` (e.g., `24-01-15`)
+
 **Examples**:
 - `v1.0.0` vs `v1.0.1` → -1
 - `v1.0.0-abc123` vs `v1.0.0-def456` → -1 ("abc123" < "def456")
-- `v1.0.0-zebra` vs `v1.0.0-apple` → 1 ("zebra" > "apple")
+- `2024-01-15` vs `2024-01-10` → 1 (chronological comparison)
+- `2023.12.25` vs `2024.01.01` → -1 (chronological comparison)
 
 ```go
 res := gitearelease.CompareVersions(
