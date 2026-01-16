@@ -345,6 +345,7 @@ func fetchData(url string) ([]byte, error) {
 
 // CompareVersions compares two version strings.
 // Returns -1 if own is older than latest, 0 if equal, and 1 if newer.
+// Supports version suffixes like "v1.0.0-commithash".
 func CompareVersions(v VersionStrings) int {
 	v.Own = TrimVersionPrefix(v.Own)
 	v.Latest = TrimVersionPrefix(v.Latest)
@@ -353,24 +354,29 @@ func CompareVersions(v VersionStrings) int {
 	latestNumbers := strings.Split(v.Latest, ".")
 
 	for i := 0; i < len(ownNumbers) && i < len(latestNumbers); i++ {
-		ownNum, err := strconv.Atoi(ownNumbers[i])
-		if err != nil {
-			fmt.Println("Invalid version:", ownNumbers[i])
-			return 0
-		}
-		latestNum, err := strconv.Atoi(latestNumbers[i])
-		if err != nil {
-			fmt.Println("Invalid version:", latestNumbers[i])
-			return 0
-		}
+		ownNum, ownSuffix := extractNumberAndSuffix(ownNumbers[i])
+		latestNum, latestSuffix := extractNumberAndSuffix(latestNumbers[i])
+
+		// Compare numeric parts first
 		if ownNum > latestNum {
 			return 1
 		}
 		if ownNum < latestNum {
 			return -1
 		}
+
+		// If numeric parts are equal, compare suffixes lexicographically
+		if ownSuffix != latestSuffix {
+			if ownSuffix > latestSuffix {
+				return 1
+			}
+			if ownSuffix < latestSuffix {
+				return -1
+			}
+		}
 	}
 
+	// If all compared components are equal, longer version is considered newer
 	if len(ownNumbers) > len(latestNumbers) {
 		return 1
 	}
@@ -378,6 +384,29 @@ func CompareVersions(v VersionStrings) int {
 		return -1
 	}
 	return 0
+}
+
+// extractNumberAndSuffix extracts the numeric prefix and any suffix from a version component.
+// For example, "123-abc" returns (123, "-abc"), and "456" returns (456, "").
+func extractNumberAndSuffix(component string) (int, string) {
+	// Find the first non-digit character
+	for i, char := range component {
+		if char < '0' || char > '9' {
+			// Parse the numeric part
+			num, err := strconv.Atoi(component[:i])
+			if err != nil {
+				// If we can't parse the number, treat it as 0
+				return 0, component
+			}
+			return num, component[i:]
+		}
+	}
+	// No suffix, parse the whole thing as a number
+	num, err := strconv.Atoi(component)
+	if err != nil {
+		return 0, component
+	}
+	return num, ""
 }
 
 // CompareVersionsHelper wraps CompareVersions and returns descriptive strings.

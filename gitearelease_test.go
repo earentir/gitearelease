@@ -367,6 +367,87 @@ func TestCompareVersions(t *testing.T) {
 	if result != expected {
 		t.Errorf("Expected: %d, got: %d", expected, result)
 	}
+
+	// Test case 6: Versions with suffixes - same base version, different suffixes
+	versionstrings.Own = "1.0.0-abc123"
+	versionstrings.Latest = "1.0.0-def456"
+	expected = -1 // "abc123" < "def456" lexicographically
+	result = CompareVersions(versionstrings)
+	if result != expected {
+		t.Errorf("Expected: %d, got: %d", expected, result)
+	}
+
+	// Test case 7: Versions with suffixes - different suffixes, own is newer
+	versionstrings.Own = "1.0.0-zebra"
+	versionstrings.Latest = "1.0.0-apple"
+	expected = 1 // "zebra" > "apple" lexicographically
+	result = CompareVersions(versionstrings)
+	if result != expected {
+		t.Errorf("Expected: %d, got: %d", expected, result)
+	}
+
+	// Test case 8: Versions with suffixes - same suffix, equal
+	versionstrings.Own = "1.0.0-abc123"
+	versionstrings.Latest = "1.0.0-abc123"
+	expected = 0
+	result = CompareVersions(versionstrings)
+	if result != expected {
+		t.Errorf("Expected: %d, got: %d", expected, result)
+	}
+
+	// Test case 9: Version with suffix vs version without suffix - with suffix is newer
+	versionstrings.Own = "1.0.0-abc123"
+	versionstrings.Latest = "1.0.0"
+	expected = 1 // version with suffix > version without suffix
+	result = CompareVersions(versionstrings)
+	if result != expected {
+		t.Errorf("Expected: %d, got: %d", expected, result)
+	}
+
+	// Test case 10: Version without suffix vs version with suffix - without suffix is older
+	versionstrings.Own = "1.0.0"
+	versionstrings.Latest = "1.0.0-abc123"
+	expected = -1 // version without suffix < version with suffix
+	result = CompareVersions(versionstrings)
+	if result != expected {
+		t.Errorf("Expected: %d, got: %d", expected, result)
+	}
+
+	// Test case 11: Versions with prefixes and suffixes - v1.0.0-commithash
+	versionstrings.Own = "v1.0.0-commithash"
+	versionstrings.Latest = "v1.0.0-otherhash"
+	expected = -1 // "commithash" < "otherhash" lexicographically
+	result = CompareVersions(versionstrings)
+	if result != expected {
+		t.Errorf("Expected: %d, got: %d", expected, result)
+	}
+
+	// Test case 12: Specific format requested by user - 0.1.33-c350f37
+	versionstrings.Own = "0.1.33-c350f37"
+	versionstrings.Latest = "0.1.32"
+	expected = 1 // 0.1.33 > 0.1.32
+	result = CompareVersions(versionstrings)
+	if result != expected {
+		t.Errorf("Expected: %d, got: %d", expected, result)
+	}
+
+	// Test case 13: Version with commit hash vs same version without hash
+	versionstrings.Own = "0.1.33-c350f37"
+	versionstrings.Latest = "0.1.33"
+	expected = 1 // version with suffix > version without suffix
+	result = CompareVersions(versionstrings)
+	if result != expected {
+		t.Errorf("Expected: %d, got: %d", expected, result)
+	}
+
+	// Test case 14: Version with commit hash vs different commit hash
+	versionstrings.Own = "0.1.33-c350f37"
+	versionstrings.Latest = "0.1.33-d450f48"
+	expected = -1 // "c350f37" < "d450f48" lexicographically
+	result = CompareVersions(versionstrings)
+	if result != expected {
+		t.Errorf("Expected: %d, got: %d", expected, result)
+	}
 }
 
 func TestTrimVersionPrefix(t *testing.T) {
