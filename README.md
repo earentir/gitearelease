@@ -84,26 +84,33 @@ rels, err := gitearelease.GetReleases(
 ---
 
 ### `TrimVersionPrefix(v string) string`
-Removes common prefixes (`v`, `version`, `rel`, etc.) from a version string.
+Removes common prefixes (`v`, `version`, `rel`, etc.) from a version string. Used internally by `CompareVersions` before parsing version numbers and suffixes.
 
 ```go
 clean := gitearelease.TrimVersionPrefix("v1.2.3") // "1.2.3"
+clean := gitearelease.TrimVersionPrefix("v1.0.0-commithash") // "1.0.0-commithash"
 ```
 
 ---
 
 ### `CompareVersions(v VersionStrings) int`
-Compares two version strings (after trimming prefixes).
+Compares two version strings (after trimming prefixes). Supports version suffixes like `-commithash`.
 
 **Parameters**:
 - `v.Own string` – your current version.
 - `v.Latest string` – the target version to compare against.
 - prefixes are stripped before numeric comparison.
+- suffixes (e.g., `-abc123`, `-beta`) are compared lexicographically after numeric parts.
 
 **Returns**:
 - `-1` if `Own < Latest`
 - `0`  if `Own == Latest`
 - `1`  if `Own > Latest`
+
+**Examples**:
+- `v1.0.0` vs `v1.0.1` → -1
+- `v1.0.0-abc123` vs `v1.0.0-def456` → -1 ("abc123" < "def456")
+- `v1.0.0-zebra` vs `v1.0.0-apple` → 1 ("zebra" > "apple")
 
 ```go
 res := gitearelease.CompareVersions(
