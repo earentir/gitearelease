@@ -345,8 +345,24 @@ func fetchData(url string) ([]byte, error) {
 
 // CompareVersions compares two version strings.
 // Returns -1 if own is older than latest, 0 if equal, and 1 if newer.
-// Supports version suffixes like "v1.0.0-commithash".
+// Supports version suffixes like "v1.0.0-commithash" and date-based versions.
 func CompareVersions(v VersionStrings) int {
+	// Try parsing as date-based versions first
+	ownDate, ownIsDate := tryParseDateVersion(v.Own)
+	latestDate, latestIsDate := tryParseDateVersion(v.Latest)
+
+	// If both versions are dates, compare chronologically
+	if ownIsDate && latestIsDate {
+		if ownDate.After(latestDate) {
+			return 1
+		}
+		if ownDate.Before(latestDate) {
+			return -1
+		}
+		return 0
+	}
+
+	// Fall back to semantic version comparison (handles mixed date/semantic versions)
 	v.Own = TrimVersionPrefix(v.Own)
 	v.Latest = TrimVersionPrefix(v.Latest)
 
@@ -407,6 +423,52 @@ func extractNumberAndSuffix(component string) (int, string) {
 		return 0, component
 	}
 	return num, ""
+}
+
+// tryParseDateVersion attempts to parse a version string as a date-based version.
+// Supports formats like: YYYY-MM-DD, YYYY.MM.DD, YYYYMMDD
+// Returns the parsed time and true if successful, otherwise zero time and false.
+func tryParseDateVersion(version string) (time.Time, bool) {
+	// Remove any prefixes first
+	cleanVersion := TrimVersionPrefix(version)
+
+	// Try different date formats in order of preference
+	dateFormats := []string{
+		"2006-01-02",     // YYYY-MM-DD
+		"2006.01.02",     // YYYY.MM.DD
+		"20060102",       // YYYYMMDD
+		"06-01-02",       // YY-MM-DD (2-digit year)
+		"06.01.02",       // YY.MM.DD (2-digit year)
+		"060102",         // YYMMDD (2-digit year)
+	}
+
+	for _, format := range dateFormats {
+		if t, err := time.Parse(format, cleanVersion); err == nil {
+			return t, true
+		}
+	}
+
+	// Also try formats with additional components (like YYYY-MM-DD.1 or YYYY-MM-DD-001)
+	if strings.Contains(cleanVersion, ".") || strings.Contains(cleanVersion, "-") {
+		// Split by common separators and try to parse the date part
+		parts := strings.FieldsFunc(cleanVersion, func(r rune) bool {
+			return r == '.' || r == '-'
+		})
+
+		if len(parts) >= 3 {
+			// Try to reconstruct date from first 3 parts
+			dateStr := strings.Join(parts[:3], "")
+			if len(dateStr) >= 6 { // At least YYMMDD
+				for _, format := range dateFormats {
+					if t, err := time.Parse(format, dateStr); err == nil {
+						return t, true
+					}
+				}
+			}
+		}
+	}
+
+	return time.Time{}, false
 }
 
 // CompareVersionsHelper wraps CompareVersions and returns descriptive strings.
