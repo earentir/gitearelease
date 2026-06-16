@@ -19,6 +19,8 @@ type versionstringstruct struct {
 	Equal      string
 	Newer      string
 	UpgradeURL string
+	Unverified string
+	Rerelease  string
 }
 
 type versionoptionsstruct struct {

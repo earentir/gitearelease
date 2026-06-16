@@ -182,6 +182,76 @@ func TrimVersionPrefix(v string) string {
 	return v
 }
 
+// trimVersionCommitSuffix removes a trailing git commit hash from a version string.
+// For example, "0.1.33-c350f37" becomes "0.1.33". Non-hex suffixes such as
+// "1.0.0-beta" are left unchanged.
+func trimVersionCommitSuffix(v string) string {
+	sep := strings.LastIndexAny(v, "-+")
+	if sep <= 0 {
+		return v
+	}
+	if isCommitHash(v[sep+1:]) {
+		return v[:sep]
+	}
+	return v
+}
+
+// versionCore returns the comparable semver portion of a version string.
+func versionCore(v string) string {
+	return trimVersionCommitSuffix(TrimVersionPrefix(v))
+}
+
+// extractCommitHash returns a normalized commit hash suffix, or "" if absent.
+func extractCommitHash(v string) string {
+	v = TrimVersionPrefix(v)
+	sep := strings.LastIndexAny(v, "-+")
+	if sep <= 0 {
+		return ""
+	}
+	hash := v[sep+1:]
+	if !isCommitHash(hash) {
+		return ""
+	}
+	return strings.ToLower(hash)
+}
+
+// isBuildVerified reports whether own and latest refer to the same release build.
+// Both sides must carry the same commit hash; missing or mismatched hashes are unverified.
+func isBuildVerified(own, latest string) bool {
+	ownHash := extractCommitHash(own)
+	latestHash := extractCommitHash(latest)
+	if ownHash == "" || latestHash == "" {
+		return false
+	}
+	return ownHash == latestHash
+}
+
+// isSameVersionRerelease reports same semver with different commit hashes on both sides.
+func isSameVersionRerelease(own, latest string) bool {
+	if versionCore(own) != versionCore(latest) {
+		return false
+	}
+	ownHash := extractCommitHash(own)
+	latestHash := extractCommitHash(latest)
+	return ownHash != "" && latestHash != "" && ownHash != latestHash
+}
+
+func isCommitHash(s string) bool {
+	if len(s) < 7 {
+		return false
+	}
+	for _, c := range s {
+		switch {
+		case c >= '0' && c <= '9':
+		case c >= 'a' && c <= 'f':
+		case c >= 'A' && c <= 'F':
+		default:
+			return false
+		}
+	}
+	return true
+}
+
 /* -------------------------------------------------------------------------- */
 /*  INTERNALS                                                                 */
 /* -------------------------------------------------------------------------- */
@@ -345,13 +415,13 @@ func fetchData(url string) ([]byte, error) {
 
 // CompareVersions compares two version strings.
 // Returns -1 if own is older than latest, 0 if equal, and 1 if newer.
-// Supports version suffixes like "v1.0.0-commithash".
+// Trailing git commit hashes are ignored for the semver comparison.
 func CompareVersions(v VersionStrings) int {
-	v.Own = TrimVersionPrefix(v.Own)
-	v.Latest = TrimVersionPrefix(v.Latest)
+	own := versionCore(v.Own)
+	latest := versionCore(v.Latest)
 
-	ownNumbers := strings.Split(v.Own, ".")
-	latestNumbers := strings.Split(v.Latest, ".")
+	ownNumbers := strings.Split(own, ".")
+	latestNumbers := strings.Split(latest, ".")
 
 	for i := 0; i < len(ownNumbers) && i < len(latestNumbers); i++ {
 		ownNum, ownSuffix := extractNumberAndSuffix(ownNumbers[i])
@@ -381,6 +451,9 @@ func CompareVersions(v VersionStrings) int {
 		return 1
 	}
 	if len(ownNumbers) < len(latestNumbers) {
+		return -1
+	}
+	if isSameVersionRerelease(v.Own, v.Latest) {
 		return -1
 	}
 	return 0
@@ -413,6 +486,20 @@ func extractNumberAndSuffix(component string) (int, string) {
 func CompareVersionsHelper(v VersionStrings) string {
 	switch CompareVersions(v) {
 	case -1:
+		if isSameVersionRerelease(v.Own, v.Latest) {
+			if v.VersionStrings.Rerelease == "" {
+				v.VersionStrings.Rerelease = "A newer build of this version is available"
+			}
+			msg := v.VersionStrings.Rerelease
+			if v.VersionStrings.UpgradeURL != "" {
+				msg = v.VersionStrings.Rerelease + " at " + v.VersionStrings.UpgradeURL
+			}
+			if v.VersionOptions.DieIfOlder {
+				fmt.Println(msg)
+				os.Exit(125)
+			}
+			return msg
+		}
 		if v.VersionStrings.Older == "" {
 			v.VersionStrings.Older = "There is a newer release available"
 		}
@@ -425,6 +512,12 @@ func CompareVersionsHelper(v VersionStrings) string {
 		}
 		return v.VersionStrings.Older
 	case 0:
+		if !isBuildVerified(v.Own, v.Latest) {
+			if v.VersionStrings.Unverified == "" {
+				v.VersionStrings.Unverified = "Not a verified build"
+			}
+			return v.VersionStrings.Unverified
+		}
 		if v.VersionOptions.ShowMessageOnCurrent {
 			if v.VersionStrings.Equal == "" {
 				v.VersionStrings.Equal = "You are up to date"

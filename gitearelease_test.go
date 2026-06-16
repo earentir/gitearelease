@@ -267,7 +267,19 @@ func TestCompareVersionsHelper(t *testing.T) {
 	versionstrings.Own = "1.0.0"
 	versionstrings.Latest = "1.0.0"
 	versionstrings.VersionOptions.ShowMessageOnCurrent = false
-	expected = ""
+	expected = "Not a verified build"
+	versionstrings.VersionStrings.Equal = ""
+	versionstrings.VersionStrings.Unverified = ""
+	versionstrings.VersionOptions.DieIfOlder = false
+	result = CompareVersionsHelper(versionstrings)
+	if result != expected {
+		t.Errorf("Expected: %s, got: %s", expected, result)
+	}
+
+	versionstrings.Own = "1.0.0-deadbee"
+	versionstrings.Latest = "1.0.0-deadbee"
+	versionstrings.VersionOptions.ShowMessageOnCurrent = true
+	expected = "You are up to date"
 	versionstrings.VersionStrings.Equal = ""
 	versionstrings.VersionOptions.DieIfOlder = false
 	result = CompareVersionsHelper(versionstrings)
@@ -275,12 +287,28 @@ func TestCompareVersionsHelper(t *testing.T) {
 		t.Errorf("Expected: %s, got: %s", expected, result)
 	}
 
-	versionstrings.Own = "1.0.0"
-	versionstrings.Latest = "1.0.0"
-	versionstrings.VersionOptions.ShowMessageOnCurrent = true
+	versionstrings.Own = "2.9.107-20802c3"
+	versionstrings.Latest = "2.9.107"
+	versionstrings.VersionStrings.Unverified = ""
+	expected = "Not a verified build"
+	result = CompareVersionsHelper(versionstrings)
+	if result != expected {
+		t.Errorf("Expected: %s, got: %s", expected, result)
+	}
+
+	versionstrings.Own = "2.9.107-20802c3"
+	versionstrings.Latest = "2.9.107-20802c3"
+	versionstrings.VersionStrings.Equal = "You are up to date"
 	expected = "You are up to date"
-	versionstrings.VersionStrings.Equal = ""
-	versionstrings.VersionOptions.DieIfOlder = false
+	result = CompareVersionsHelper(versionstrings)
+	if result != expected {
+		t.Errorf("Expected: %s, got: %s", expected, result)
+	}
+
+	versionstrings.Own = "2.9.107-20802c3"
+	versionstrings.Latest = "2.9.107-aabbccd"
+	versionstrings.VersionStrings.Rerelease = ""
+	expected = "A newer build of this version is available"
 	result = CompareVersionsHelper(versionstrings)
 	if result != expected {
 		t.Errorf("Expected: %s, got: %s", expected, result)
@@ -368,10 +396,10 @@ func TestCompareVersions(t *testing.T) {
 		t.Errorf("Expected: %d, got: %d", expected, result)
 	}
 
-	// Test case 6: Versions with suffixes - same base version, different suffixes
-	versionstrings.Own = "1.0.0-abc123"
-	versionstrings.Latest = "1.0.0-def456"
-	expected = -1 // "abc123" < "def456" lexicographically
+	// Test case 6: Versions with commit hashes - same base version, different hashes
+	versionstrings.Own = "1.0.0-abc1234"
+	versionstrings.Latest = "1.0.0-def4567"
+	expected = -1
 	result = CompareVersions(versionstrings)
 	if result != expected {
 		t.Errorf("Expected: %d, got: %d", expected, result)
@@ -387,27 +415,27 @@ func TestCompareVersions(t *testing.T) {
 	}
 
 	// Test case 8: Versions with suffixes - same suffix, equal
-	versionstrings.Own = "1.0.0-abc123"
-	versionstrings.Latest = "1.0.0-abc123"
+	versionstrings.Own = "1.0.0-abc1234"
+	versionstrings.Latest = "1.0.0-abc1234"
 	expected = 0
 	result = CompareVersions(versionstrings)
 	if result != expected {
 		t.Errorf("Expected: %d, got: %d", expected, result)
 	}
 
-	// Test case 9: Version with suffix vs version without suffix - with suffix is newer
-	versionstrings.Own = "1.0.0-abc123"
+	// Test case 9: Version with commit hash vs version without hash - same semver
+	versionstrings.Own = "1.0.0-abc1234"
 	versionstrings.Latest = "1.0.0"
-	expected = 1 // version with suffix > version without suffix
+	expected = 0
 	result = CompareVersions(versionstrings)
 	if result != expected {
 		t.Errorf("Expected: %d, got: %d", expected, result)
 	}
 
-	// Test case 10: Version without suffix vs version with suffix - without suffix is older
+	// Test case 10: Version without hash vs version with commit hash - same semver
 	versionstrings.Own = "1.0.0"
-	versionstrings.Latest = "1.0.0-abc123"
-	expected = -1 // version without suffix < version with suffix
+	versionstrings.Latest = "1.0.0-abc1234"
+	expected = 0
 	result = CompareVersions(versionstrings)
 	if result != expected {
 		t.Errorf("Expected: %d, got: %d", expected, result)
@@ -434,16 +462,34 @@ func TestCompareVersions(t *testing.T) {
 	// Test case 13: Version with commit hash vs same version without hash
 	versionstrings.Own = "0.1.33-c350f37"
 	versionstrings.Latest = "0.1.33"
-	expected = 1 // version with suffix > version without suffix
+	expected = 0
 	result = CompareVersions(versionstrings)
 	if result != expected {
 		t.Errorf("Expected: %d, got: %d", expected, result)
 	}
 
-	// Test case 14: Version with commit hash vs different commit hash
+	// Test case 14: Version with commit hash vs different commit hash, same semver
 	versionstrings.Own = "0.1.33-c350f37"
 	versionstrings.Latest = "0.1.33-d450f48"
-	expected = -1 // "c350f37" < "d450f48" lexicographically
+	expected = -1
+	result = CompareVersions(versionstrings)
+	if result != expected {
+		t.Errorf("Expected: %d, got: %d", expected, result)
+	}
+
+	// Test case 15: Real-world version with short commit hash, release has no hash
+	versionstrings.Own = "2.9.107-20802c3"
+	versionstrings.Latest = "2.9.107"
+	expected = 0
+	result = CompareVersions(versionstrings)
+	if result != expected {
+		t.Errorf("Expected: %d, got: %d", expected, result)
+	}
+
+	// Test case 16: Same semver re-released with a different commit hash
+	versionstrings.Own = "2.9.107-20802c3"
+	versionstrings.Latest = "2.9.107-aabbccd"
+	expected = -1
 	result = CompareVersions(versionstrings)
 	if result != expected {
 		t.Errorf("Expected: %d, got: %d", expected, result)
